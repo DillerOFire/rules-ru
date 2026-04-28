@@ -1,0 +1,42 @@
+name: Build RU Sing-box SRS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-ru-srs
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      - name: Build SRS files
+        run: ./scripts/build-ru-srs.sh
+
+      - name: Commit and push changes
+        run: |
+          if git diff --quiet -- geoip-ru.srs geosite-ru-available-only-inside.srs geosite-ru-available-onely-inside.srs; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add geoip-ru.srs geosite-ru-available-only-inside.srs geosite-ru-available-onely-inside.srs
+          git commit -m "chore: update RU sing-box SRS"
+          git push
