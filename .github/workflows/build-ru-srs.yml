@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: "stable"
-          cache: false
 
       - name: Build SRS files
         run: ./scripts/build-ru-srs.sh
